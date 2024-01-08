@@ -1,0 +1,54 @@
+name: test
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  GOPROXY: https://proxy.golang.org/
+
+jobs:
+  copywrite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Install copywrite
+        uses: hashicorp/setup-copywrite@v1.1.2
+      - name: Validate Header Compliance
+        run: copywrite headers --plan
+
+  test:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+        go:
+          - "1.18"
+          - "1.19"
+          - "1.20"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: ${{ matrix.go }}
+      - name: Go mod download
+        run: go mod download -x
+      - name: Go mod verify
+        run: go mod verify
+      - name: Run tests
+        run: go test -v ./...
