@@ -81,6 +81,11 @@ type Plan struct {
 	// Timestamp contains the static timestamp that Terraform considers to be
 	// the time this plan executed, in UTC.
 	Timestamp string `json:"timestamp,omitempty"`
+
+	// ProposedUnknown is a representation of the attributes, including any
+	// potentially-unknown attributes. Each value is replaced with "true" or
+	// "false" depending on whether it is known in the proposed plan.
+	ProposedUnknown *StateValues `json:"proposed_unknown,omitempty"`
 }
 
 // ResourceAttribute describes a full path to a resource attribute
